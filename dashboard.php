@@ -65,7 +65,61 @@ function formatBytes($bytes, $decimals = 2) {
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Cloud Storage</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css" rel="stylesheet">
     <style>
+
+        .dark-mode .input-group input,
+        .dark-mode .input-group button {
+            color: white;
+            background-color: #333;
+            border-color: #555;
+        }
+
+        .dark-mode .input-group input::placeholder {
+            color: #ccc;
+        }
+
+        /* Light mode default */
+        .input-group input,
+        .input-group button {
+            color: black;
+        }
+
+        body.dark-mode {
+            background-color: #121212;
+            color: #ffffff;
+        }
+
+        .dark-mode .navbar {
+            background-color: #1f1f1f !important;
+        }
+
+        .dark-mode .list-group-item {
+            background-color: #2c2c2c;
+            color: #ffffff;
+            border-color: #444;
+        }
+
+        .dark-mode .modal-content {
+            background-color: #1e1e1e;
+            color: #ffffff;
+        }
+
+        .dark-mode .form-control {
+            background-color: #2c2c2c;
+            color: #ffffff;
+            border-color: #444;
+        }
+
+        .dark-mode .btn-close {
+            filter: invert(1);
+        }
+
+        .dark-mode .toast {
+            background-color: #2c2c2c;
+            color: #fff;
+        }
+
         .file-item {
             display: flex;
             justify-content: space-between;
@@ -95,11 +149,22 @@ function formatBytes($bytes, $decimals = 2) {
             </button>
             <div class="collapse navbar-collapse" id="navbarNav">
                 <ul class="navbar-nav ms-auto">
+                <li class="nav-item">
+                    <a class="nav-link active position-relative" href="#">
+                        <i class="bi bi-cloud-fill position-absolute" style="left: -20px; top: 50%; transform: translateY(-50%); opacity: 0.3; font-size: 1.5rem;"></i>
+                        Welcome, <?= $_SESSION['username']; ?>!
+                    </a>
+                </li>
                     <li class="nav-item">
-                        <a class="nav-link active" href="#">Welcome, <?= $_SESSION['username']; ?>!</a>
+                        <a class="nav-link btn btn-danger text-white" href="logout.php">Logout</a>
                     </li>
-                    <li class="nav-item">
-                        <a class="nav-link" href="logout.php">Logout</a>
+                    <li class="nav-item d-flex align-items-center ms-3">
+                        <div class="form-check form-switch text-white">
+                            <input class="form-check-input" type="checkbox" id="darkModeToggle">
+                            <label class="form-check-label" for="darkModeToggle">
+                                <span id="modeIcon">🌞</span>
+                            </label>
+                        </div>
                     </li>
                 </ul>
             </div>
@@ -222,9 +287,32 @@ function formatBytes($bytes, $decimals = 2) {
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js"></script>
     
     <script>
+        $('#uploadForm').on('submit', function () {
+            $('form button[type="submit"]')
+            .prop('disabled', true) // Disable tombol
+            .css({
+                'background-color': '#ccc', // Ubah warna ke abu
+                'border-color': '#ccc',
+                'cursor': 'not-allowed'
+            });
+            $('#loadingSpinner').css({
+                'display': 'block',
+                'position': 'fixed',
+                'top': '50%',
+                'left': '50%',
+                'transform': 'translate(-50%, -50%)',
+                'z-index': '9999'
+            }); // Tampilkan spinner di tengah
+        });
+        
         // Show Toast after upload success
         <?php if ($upload_success): ?>
             showToast('File Uploaded', 'Your file has been successfully uploaded!');
+
+            // Tunggu sebentar (misalnya 3 detik), lalu reload tanpa parameter
+            setTimeout(function () {
+                window.location.href = window.location.pathname; // Hapus query string
+            }, 1000); // 1 detik
         <?php endif; ?>
 
         // Function to show the Rename Modal and set the current filename
@@ -323,6 +411,35 @@ function formatBytes($bytes, $decimals = 2) {
             e.preventDefault();
             renameFile();
         });
+
+                // Load dark mode preference from localStorage
+    document.addEventListener('DOMContentLoaded', function () {
+        const darkModeToggle = document.getElementById('darkModeToggle');
+        const modeIcon = document.getElementById('modeIcon');
+        const isDark = localStorage.getItem('darkMode') === 'true';
+
+        // Set the initial dark mode state based on localStorage
+        if (isDark) {
+            document.body.classList.add('dark-mode');
+            darkModeToggle.checked = true;
+            modeIcon.textContent = '🌙'; // Moon emoji for dark mode
+        } else {
+            modeIcon.textContent = '🌞'; // Sun emoji for light mode
+        }
+
+        // Toggle dark mode and save the preference to localStorage
+        darkModeToggle.addEventListener('change', function () {
+            document.body.classList.toggle('dark-mode');
+            localStorage.setItem('darkMode', this.checked);
+
+            // Change the emoji based on the new state
+            if (this.checked) {
+                modeIcon.textContent = '🌙'; // Moon emoji for dark mode
+            } else {
+                modeIcon.textContent = '🌞'; // Sun emoji for light mode
+            }
+        });
+    });
     </script>
 </body>
 </html>
